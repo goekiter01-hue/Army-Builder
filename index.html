@@ -6,14 +6,17 @@
 <meta name="theme-color" content="#131316" />
 <title>Army Forge</title>
 <link rel="manifest" href="manifest.json" />
-<style>html,body{margin:0;background:#131316;height:100%;}#root{min-height:100%;}</style>
+<style>html,body{margin:0;background:#131316;height:100%;}#root{min-height:100%;}
+#boot-error{display:none;color:#f3f3f5;font-family:monospace;padding:20px;white-space:pre-wrap;font-size:12px;}</style>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
 <div id="root"></div>
-<script type="text/babel" data-presets="react" data-preset-react-runtime="classic">
+<pre id="boot-error"></pre>
+
+<script type="text/plain" id="app-source">
 const { useState, useMemo, useEffect, useCallback, useRef } = React;
 
 
@@ -1419,8 +1422,29 @@ function ArmyBuilder() {
   );
 }
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(React.createElement(ArmyBuilder));
+</script>
+
+<script>
+(function () {
+  function showError(err) {
+    var el = document.getElementById('boot-error');
+    el.style.display = 'block';
+    el.textContent = 'No se pudo iniciar la app:\n\n' + (err && err.stack ? err.stack : err);
+  }
+  try {
+    var src = document.getElementById('app-source').textContent;
+    var compiled = Babel.transform(src, {
+      presets: [['react', { runtime: 'classic' }]]
+    }).code;
+    var runApp = new Function('React', 'ReactDOM', compiled + '\nreturn ArmyBuilder;');
+    var ArmyBuilder = runApp(React, ReactDOM);
+    var root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(ArmyBuilder));
+  } catch (err) {
+    showError(err);
+    console.error(err);
+  }
+})();
 </script>
 </body>
 </html>
