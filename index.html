@@ -1,24 +1,4 @@
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#131316" />
-<title>Army Forge</title>
-<link rel="manifest" href="manifest.json" />
-<style>html,body{margin:0;background:#131316;height:100%;}#root{min-height:100%;}
-#boot-error{display:none;color:#f3f3f5;font-family:monospace;padding:20px;white-space:pre-wrap;font-size:12px;}</style>
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-</head>
-<body>
-<div id="root"></div>
-<pre id="boot-error"></pre>
-
-<script type="text/plain" id="app-source">
-const { useState, useMemo, useEffect, useCallback, useRef } = React;
-
+import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
 
 /* =================================================================
    DATOS: Age of Sigmar (BSData/age-of-sigmar-4th) y Warhammer 40.000
@@ -47,10 +27,7 @@ const AOS_FACTIONS = Object.keys(AOS_DB).sort();
 const W40K_FACTIONS = Object.keys(W40K_DB).sort();
 
 /* -----------------------------------------------------------------
-   Paleta: mismo patrón de tarjetas y formas que ListForge, pero en
-   tonos oscuros suaves — sin el salto fuerte negro/blanco. Todo el
-   esquema se mueve en grises cálidos oscuros con poco contraste
-   entre capas.
+   Colores de la app
 ----------------------------------------------------------------- */
 const BG = "#131316";
 const SECTION = "#1b1b1f";
@@ -66,7 +43,7 @@ const BORDER = "#303036";
 const DANGER = "#d1594e";
 const GOLD = "#c9924a";
 const W40K_ACCENT = "#c15b47";
-// alias históricos para no reescribir cada referencia
+      
 const INK = BG;
 const PANEL = SECTION;
 const PANEL2 = SECTION2;
@@ -156,15 +133,6 @@ const POINTS_LIMIT_W40K = 2000;
 /* -----------------------------------------------------------------
    Almacenamiento persistente — claves separadas por juego para no
    mezclar listas de AoS y 40k.
-   Tres niveles, de mejor a peor, para que la app SIEMPRE funcione
-   sea cual sea el sitio donde se esté viendo este archivo:
-   1. window.storage — API de artefactos interactivos de Claude.
-   2. localStorage — navegador normal, PWA/APK empaquetada.
-   3. Memoria en la propia pestaña — red de seguridad para vistas
-      previas en sandbox donde ni siquiera localStorage esté
-      permitido (por ejemplo, el visor de archivos del chat). En
-      este último caso los datos NO sobreviven a cerrar o recargar
-      la pestaña, pero la app deja de romperse.
 ----------------------------------------------------------------- */
 const memoryStore = new Map();
 
@@ -1187,7 +1155,7 @@ function AddUnitToRegimentModal({ system, faction, regLabel, onClose, onPick }) 
 
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 55 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: SECTION, borderRadius: "16px 16px 0 0", width: "100%", maxWidth: 620, maxHeight: "80vh", display: "flex", flexDirection: "column" }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: SECTION, borderRadius: "16px 16px 0 0", width: "100%", maxWidth: 620, height: "80vh", display: "flex", flexDirection: "column" }}>
         <div style={{ padding: "16px 18px 10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <div style={{ fontSize: 10.5, color: accent, fontWeight: 600 }}>{regLabel}</div>
@@ -1198,7 +1166,7 @@ function AddUnitToRegimentModal({ system, faction, regLabel, onClose, onPick }) 
         <div style={{ padding: "0 18px 10px" }}>
           <SearchInput value={query} onChange={(e) => setQuery(e.target.value)} placeholder={`Buscar en ${faction}...`} style={{ width: "100%" }} />
         </div>
-        <div className="ab-scroll" style={{ overflowY: "auto", padding: "0 18px 18px" }}>
+        <div className="ab-scroll" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 18px 18px" }}>
           {heroes.length > 0 && (
             <>
               <div style={{ fontSize: 11, color: MUTED, fontWeight: 700, margin: "8px 0 6px", letterSpacing: 0.4, textTransform: "uppercase" }}>
@@ -1402,7 +1370,7 @@ function MainMenu({ onSelect }) {
 /* =================================================================
    APP RAÍZ — ocupa todo el ancho disponible, sin márgenes muertos
 ================================================================= */
-function ArmyBuilder() {
+export default function ArmyBuilder() {
   const [game, setGame] = useState(null); // null | "aos" | "w40k"
 
   return (
@@ -1421,30 +1389,3 @@ function ArmyBuilder() {
     </div>
   );
 }
-
-</script>
-
-<script>
-(function () {
-  function showError(err) {
-    var el = document.getElementById('boot-error');
-    el.style.display = 'block';
-    el.textContent = 'No se pudo iniciar la app:\n\n' + (err && err.stack ? err.stack : err);
-  }
-  try {
-    var src = document.getElementById('app-source').textContent;
-    var compiled = Babel.transform(src, {
-      presets: [['react', { runtime: 'classic' }]]
-    }).code;
-    var runApp = new Function('React', 'ReactDOM', compiled + '\nreturn ArmyBuilder;');
-    var ArmyBuilder = runApp(React, ReactDOM);
-    var root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(ArmyBuilder));
-  } catch (err) {
-    showError(err);
-    console.error(err);
-  }
-})();
-</script>
-</body>
-</html>
